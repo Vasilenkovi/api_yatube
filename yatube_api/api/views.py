@@ -1,10 +1,9 @@
 from rest_framework import viewsets, permissions
 from rest_framework.exceptions import NotFound
-from rest_framework.decorators import action
-from rest_framework.response import Response
 from posts.models import Post, Group, Comment
 from .serializers import PostSerializer, GroupSerializer, CommentSerializer
 from .permissions import IsAuthorOrReadOnly
+
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
@@ -14,10 +13,12 @@ class PostViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
+
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
     permission_classes = [permissions.IsAuthenticated]
+
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
@@ -37,7 +38,8 @@ class CommentViewSet(viewsets.ModelViewSet):
     def get_object(self):
         comment_id = self.kwargs.get('comment_id')
         try:
-            comment = Comment.objects.get(id=comment_id, post__id=self.kwargs['post_id'])
+            comment = Comment.objects.get(id=comment_id,
+                                          post__id=self.kwargs['post_id'])
         except Comment.DoesNotExist:
             raise NotFound()
         self.check_object_permissions(self.request, comment)
